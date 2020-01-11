@@ -10,4 +10,4 @@ Now this repository contains my Data Analysis and Visualisation project. Mostly 
 
 #### Also you can look the R portfolio [here](http://rpubs.com/snegirev_nikita/).
 
-_Note: here information updeiting in progress and page still on redaction.
+_Note: here information updeiting in progress and page still on redaction._
