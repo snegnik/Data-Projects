@@ -1,0 +1,390 @@
+---
+#для подгрузки стиля установите пакет
+#install.packages("prettydoc")
+
+title: 'Влияние различных параметров квартиры на формирование её стоимости'
+subtitle: '(по данным агрегатора NMarket.pro по городу Санкт-Петербург за 19.06.2019)'
+author: "Никита Снегирев"
+date: "05.10.2019"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+header-includes:
+- \usepackage[T2A]{fontenc}
+- \usepackage[utf8]{inputenc}
+- \usepackage[english, russian]{babel}
+always_allow_html: yes
+---
+```{r, setup, include=FALSE}
+#для корректной работы документа установите ряд пакетов:
+packages <- c("ggplot2", "data.table", "dplyr", "kableExtra", "readr", "stringr", "coin", "knitr", "grid", "vcd", "digest")
+#функция проверяющая наличие, устанавливающая отсутствующие пакеты
+ipak <- function(pkg){
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg)) 
+        install.packages(new.pkg, dependencies = TRUE)
+}
+#раскомментируйте и установите пакеты, используя ранее созданную функцию
+#ipak(packages)
+
+#запускаем пакеты
+sapply(packages, require, character.only = TRUE)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+#отключить экспоненциальную запись, например, m*10^n
+options(scipen=999)
+```
+```{r, echo=F}
+data <- read.csv("PropPriceNMarket(I-IIIkv2020)_19_06_2019.csv", sep = ";", na.strings = c("","NA"))
+
+##Предобработка данных
+
+#убираю пропущенные значения
+data <- data[-which(is.na(data)),]
+# проверочный код any(is.na(data))
+
+#удаляю некоретные цены за квадратный метр. 
+data.f <- filter(data, za_m2<3*(mean(za_m2)))
+
+#исправляю обозначения материалов
+levels(data.f$Tip)[levels(data.f$Tip) == "k/m"] <- "K/M"
+levels(data.f$Tip)[levels(data.f$Tip) == "pn"] <- "PN"
+#K/M - кирпич/монолит
+#MK - монолитно-каркасный
+#MN - монолитный
+#PM - панельно-монолитный
+#PN - панель
+#TBD - технология бесшовного домостроения
+
+#удаляю застройщика с нулевым числом квартир
+data.f <- filter(data.f, Prodavetc != "Nmarket.PRO SPb")
+
+#исправляю значения переменной 
+#установить пакет install.packages("readr")
+#library(readr)
+data.f$S_Komnaty <- parse_number(gsub(",", ".", data.f$S_Komnaty))
+
+#сделал две подвыборки Апарты и Квартиры
+#установить пакет install.packages("stringr")
+#library(stringr)
+data.f$type <- factor(ifelse(str_detect(data.f$Obekt.1, "1A"), 1, 
+                             ifelse(str_detect(data.f$Obekt.1, "2A"), 1, 
+                                    ifelse(str_detect(data.f$Obekt.1, "SA"), 1, 0))), 
+                      labels = c("K","A")
+                      )
+
+```
+
+## Введение
+
+Данное исследование посвящено рынку недвижимости в городе Санкт-Петербурге. За основу взяты данные из агрегатора объектов недвижимости по данному городу. Предварительно в исследование закладывалось три задачи. Первая, найти неочевидные соотношения между параметрами квартиры и ценой. Вторая, определить есть ли существенные различия в цене меду апартаментами и квартирами. И, третья, это проверить как этажность дома соотносится с его ценой. 
+Предварительно было сформировано две гипотезы. Первая --- общий консенсус касательно цен на апартамены, предполагается, что они дешевше, в среднем, чем квартиры. Вторая гипотеза о том, что квартиры в низкоэтажной застройке 3-6-9 этажей дороже, чем высотная. В ходе исследования обе гипотезы были опровергнуты. Кроме того, были проанализированы, также, и другие показатели, например, стоимость жилого комплекса и материал из которого он построен. Ниже будут представлены графики и результаты статистических тестов, с подробным описанием. За основу взята только цена за квадратный метр, чтобы сократить размер работы, без потери для содержательных выводов. 
+
+### Объект исследования
+
+В качестве объекта исследования были взяты жилые комплексы, тех застройщиков, которые сотрудничают с агрегатором NMarket. Из тех, что были доступны для бронирования на момент 19.06.2019 была сделана выборка. На каждый ЖК приходится в среднем `r round(mean(table(data.f$Obekt)),digits=0)` квартир.
+
+На графике ниже вы можете увидеть распределение жилых комплексов по районам. Цветовое обозначение позволяет более четко визуально раличать районы Санкт-Петербурга.
+
+```{r, cache=TRUE, echo=FALSE}
+ggplot(data.f, aes(Obekt))+
+    geom_bar(aes(fill = Raion))+
+    facet_grid(Raion ~ .,  scales = "free", space = "free")+
+    coord_flip()+
+    scale_fill_discrete(name = "District")+
+    labs(caption = "Chart 1. Count of objects by residential complex and district",
+         x = "Residental complex",
+         y = "number of flats(aparts)")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+```
+
+## Анализ рынка недвижимости Санкт-Петербурга
+
+### Статистические тесты
+
+Проверка основных показателей: цена общая за квартиру и цена за квадратный метр.
+
+```{r two-column, results='asis', echo=FALSE, out.extra=''}
+#library(knitr)
+cat("<table class='container'><tr>")
+cat("<td>")
+#проверка на нормальность распределения переменной общей цены
+ggplot(data.f, aes(TCena))+
+    geom_histogram(bins = 30)+
+    scale_x_continuous(name = "Flat Price")+
+    labs(caption = "Hist 1. (Left) Price general for square meter")
+cat("</td>")
+cat("<td>")
+#и цены за квадратный метр
+ggplot(data.f, aes(za_m2))+
+    geom_histogram(bins = 30)+
+    scale_x_continuous(name = "Price for square meter")+
+    labs(caption = "Hist 2. (Right) Price general for the flet(apart)")
+cat("</td>")
+cat("</tr></table>")
+```
+```{r, echo=T}
+#проверка на нормальность тестом Шапиро-Вилко для цены за квадратный метр
+shapiro.test(data.f$za_m2)$p.value
+#для цены за общей
+shapiro.test(data.f$TCena)$p.value
+```
+Как видно на Гистограмме 1, цена за квартиру имеет сильную скошенность влево. На Гистограмме 2, распределение цены за квадратный метр так же скошено, однако гораздо ближе к нормальному распределению, чем распределение на Гистограмме 1. Поэтому для дальнейшего анализа будет использоваться параметр цены за квадратный метр. Стоит заметить, что тест Шапиро-Вилко показал незначительное отличие в данных распределениях --- с p-value `r shapiro.test(data.f$za_m2)$p.value` для общей цены и p-value `r shapiro.test(data.f$TCena)$p.value` для цены за квадратный метр --- они далеки от нормального распределения.
+
+
+### Соотношения между параметрами квартиры и её ценой
+
+Ниже представлены расчеты таких статистических показателей как средняя цена (mean_price), медианная цена (median_price), минимальная цена (min) и максимальная цены (max). Красным цветом были выделены те показатели средней и мединной цены, по данной переменной, которые превышают среднюю по всем полученным показателям, по каждому столбику. Синим цветом, соответственно, показатели ниже среднего. Так, можно сразу различить по две группы квартир по каждому из трех параметров - дорогие/дешевые.
+
+#### Отношение квартиры к ЖК
+
+```{r, echo=FALSE, message=FALSE}
+#установить пакет install.packages("kableExtra")
+#library(kableExtra)
+data.obekt <- group_by(data.f, Obekt)
+data.obekt <- rename(data.obekt, "Жилой комплекс" = Obekt)
+sum1 <- summarise(data.obekt,
+                      number = n(),
+                      mean_price = round(mean(za_m2), digits = 0),
+                      median_price = median(za_m2),
+                      min = min(za_m2),
+                      max = max(za_m2),
+            )
+
+sum1 %>%
+      mutate(
+        mean_price = cell_spec(mean_price, "html", color = 
+            ifelse(mean_price>mean(mean_price),"red","blue")),
+        median_price = cell_spec(median_price, "html", color = 
+            ifelse(median_price>mean(median_price),"red","blue"))) %>% 
+      kable(format = "html", escape = F) %>%
+      kable_styling(bootstrap_options = "striped", full_width = F) %>% 
+      footnote(general = "Relation of the price to the residental complex",
+               general_title = "Table 1.", 
+               footnote_as_chunk = T)
+```
+
+#### Отношение квартиры к Району
+
+```{r, echo=FALSE}
+data.raion <- group_by(data.f, Raion)
+data.raion <- rename(data.raion, "Район" = Raion)
+sum2 <- summarise(data.raion,
+                      number = n(),
+                      mean_price = round(mean(za_m2), digits = 0),
+                      median_price = median(za_m2),
+                      min = min(za_m2),
+                      max = max(za_m2),
+            )
+sum2 %>%
+      mutate(
+        mean_price = cell_spec(mean_price, "html", color = 
+           ifelse(mean_price>mean(mean_price),"red","blue")),
+        median_price = cell_spec(median_price, "html", color =                                ifelse(median_price>mean(median_price),"red","blue"))) %>% 
+      kable(format = "html", escape = F) %>%
+      kable_styling(bootstrap_options = "striped", full_width = F) %>% 
+      footnote(general = "Relation of the price to the district",
+               general_title = "Table 2.", 
+               footnote_as_chunk = T)
+```
+
+#### Тип квартиры
+
+```{r, echo=FALSE}
+data.obekt.1 <- group_by(data.f, Obekt.1)
+data.obekt.1 <- rename(data.obekt.1, "Тип квартиры" = Obekt.1)
+sum3 <- summarise(data.obekt.1,
+                      number = n(),
+                      mean_price = round(mean(za_m2), digits = 0),
+                      median_price = median(za_m2),
+                      min = min(za_m2),
+                      max = max(za_m2),
+            )
+sum3 %>%
+      mutate(
+        mean_price = cell_spec(mean_price, "html", color = 
+                                 ifelse(mean_price>mean(mean_price),"red","blue")),
+        median_price = cell_spec(median_price, "html", color = 
+                                 ifelse(median_price>mean(median_price),"red","blue"))) %>% 
+      kable(format = "html", escape = F) %>%
+      kable_styling(bootstrap_options = "striped", full_width = F) %>% 
+      footnote(general = "Relation of the price to the type of flat(apart)",
+               general_title = "Table 3.", 
+               footnote_as_chunk = T)
+
+ggplot(data.f, aes(za_m2))+
+    geom_histogram(aes(fill = Raion), bins = 30)+
+    facet_wrap(Obekt.1 ~ .,  ncol = 2)+
+    scale_fill_discrete(name = "District")+
+    scale_x_continuous(name = "Price for square meter")+
+    labs(caption = "Hist 3. Count of prices for square meter to the district \n 1A - one room apart \n 2A - two rooms apart \n SA - studio apart \n 1K - one room flat \n 2K - two rooms flat \n 3K - tree rooms flat \n ST - studio")+
+    theme(strip.text.y = element_text(angle = 0),
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.caption = element_text(hjust = 0))
+```
+
+Далее я проверил, как тип материала из которого строят дом влияет на цену квартиры. На графике ниже цветом отмечены разные типы материалов из которых делаются дома. Гистограммы разбиты по отдельным застрощикам. Видно, что в каждой ячейке несколько цветов со своим распределением - это разные жилые комплексы. Судя по гистограммам, можно сказать, что материал из которого делается дом, связан с отдельным ценовым сегментом квартир. О причинной зависимости говорить нельзя, поскольку на цену жилого комплекса, в целом, оказывают так же другие значимые факторы, например, его расположение в том или ином районе. Например, монолитные дома могут стоить как относительно остальных цен дорого `r round(mean(filter(data.f, Tip == "MN" & Prodavetc == "Evrostroi")$za_m2), digits = 0)`р., так и находится в начале ценовой шкалы `r round(mean(filter(data.f, Tip == "MN" & Prodavetc == "Gazprombank-Invest")$za_m2), digits = 0)`р.
+
+```{r, echo=FALSE}
+ggplot(data.f, aes(za_m2))+
+    geom_histogram(aes(fill = Tip), bins = 30)+
+    facet_wrap(Prodavetc ~ .,  ncol = 4)+
+    scale_fill_discrete(name = "Material")+
+    scale_x_continuous(name = "Price for square meter")+
+    labs(caption = "Hist 4. Count of price for square meter by type of material and developer \n K/M - brick/monolith \n MK - monolithic-frame \n MN - monolithic \n PM - panel-monolithic \n PN - panel \n TBD - seamless housing technology")+
+    theme(strip.text.y = element_text(angle = 0),
+          axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.caption = element_text(hjust = 0))
+```
+
+### Апартаменты
+
+Ниже мною было произведено сравнение двух типов объектов недвижимости: апартаментов и квартир. 
+
+```{r, echo=FALSE}
+#Апарты и Квартиры и сравнить их средние цены за кв.м
+data.type <- group_by(data.f, type)
+summary.type <- summarise(data.type,
+                      numbers = n(),
+                      mean_price = round(mean(za_m2), digits = 0),
+                      median_price = round(median(za_m2), digits = 0),
+                      min_price = min(za_m2),
+                      max_price = max(za_m2),
+)
+summary.type %>% 
+      mutate(
+        mean_price = cell_spec(mean_price, "html", color = 
+                                 ifelse(mean_price>mean(mean_price),"red","blue")),
+        median_price = cell_spec(median_price, "html", color = 
+                                 ifelse(median_price>mean(median_price),"red","blue"))) %>% 
+      kable(format = "html", escape = F) %>%
+      kable_styling(bootstrap_options = "striped", full_width = F) %>% 
+      footnote(general = "Relation of the price to the type of flat vs apart",
+               general_title = "Table 4.", 
+               footnote_as_chunk = T)
+```
+
+Как видно из данных пропорция типов имеет перевес в `r round(summary.type$numbers[2]/summary.type$numbers[1]*100, digits = 0)` раз, в пользу квартир. Такой разрыв обусловлен тем, что подобная пропорция сохраняется на рынке предложения недвижимости. Апартаменты сейчас набирают популярность, но пока не занимают соразмерную долю рынка, так как являются все же спецефической нишей между отелями и традиционным жильем. Кроме попорции, мы так же видим большой разрыв в средней цене за квадратный метр `r summary.type$mean_price[1]` р. за квартуру и `r summary.type$mean_price[2]` р. за апарт, а так же, еще больший в цене медианной `r summary.type$median_price[1]` р. за квартиру и `r summary.type$median_price[2]` р. за апарт. Разброс между минимальной и максимальной ценой квартир больше, за счет квартир типа: студия. 
+
+```{r, echo=FALSE}
+#Какие застойщики строят аппарты/квартиры и сколько
+ggplot(data.f, aes(Obekt))+
+    geom_bar(aes(fill = type))+
+    facet_grid(Prodavetc ~ .,  scales = "free", space = "free")+
+    coord_flip()+
+    labs(caption = "Chart 2. Count of objects by residential complex and developer",
+         x = "Residental complex",
+         y = "number of flats(aparts)")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+```
+
+Далее представлен график распределения жилых комплексов по застройщикам в разрезе по типу объектов недвижимости. Можно увидеть кто из застройщиков специализируется на таком жилье. Как видно, `r unique(factor(filter(data.f, type == "A")$Prodavetc))` являются застройщиками жилья типа апарт и кроме апартов они ничего не строят, кроме застройщика Pioner
+
+```{r echo=FALSE}
+#сравнение квартир и апартов по средней цене за кв. и по материалам
+ggplot(data.f, aes(za_m2))+
+    geom_histogram(aes(fill = type), bins = 20)+
+    facet_wrap(Tip ~ .,  ncol = 3)+
+    labs(caption = "Hist 5. Count of price for square meterName by material and type of object \n K/M - brick/monolith \n MK - monolithic-frame \n MN - monolithic \n PM - panel-monolithic \n PN - panel \n TBD - seamless housing technology",
+         x = "Price for square meter")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+
+```
+
+Последний график демонстрирует распределение апартов по типу материалов из которых их изготовляют. Как видно, апарты делают из материалов монолит-кирпич и монолит
+
+### Этажность
+
+Третья гипотеза посвящена изучению влияния этажности здания на цену квартир в нем. Прежде всего был применен статистический тест Спирмена на наличие корреляции. Результат тест показал p-value `r pvalue(spearman_test(~ za_m2 + Etaj, data.f))`, что не позволяет принять альтернативную гипотезу о наличии корреляции, поскольку вероятность меньше установленной нами границы в 0.05. 
+
+```{r, echo=FALSE}
+#устанавливаем пакет для теста Спирмена install.packages("coin")
+#library(coin)
+spearman_test(~ za_m2 + Etaj, data.f)
+#отбрасываем альтернативную гипотезу о наличии корреляции. 
+```
+
+Ниже представлены два графика, демонстрирующие распределение отношения между перменнй Этажность и переменными цена за квадратный метр и общая жилая площадь. 
+
+```{r, results='asis', echo=FALSE, out.extra=''}
+#library(knitr)
+cat("<table class='container'><tr>")
+cat("<td>")
+#проверка на нормальность распределения переменной общей цены
+ggplot(data.f, aes(za_m2, Etaj))+
+    geom_point()+
+    scale_y_continuous(name = "Level")+
+    scale_x_continuous(name = "Price for square meter")+
+    labs(caption = "Chart 3. (Left) Correletion of the Price for square meter and the Level of the house")
+cat("</td>")
+cat("<td>")
+#и цены за квадратный метр
+ggplot(data.f, aes(S_zhil, Etaj))+
+    geom_point()+
+    scale_y_continuous(name = "Level")+
+    scale_x_continuous(name = "Total living area")+
+    labs(caption = "Chart 4. (Right) Correletion of the Total living area and the Level of he house")
+cat("</td>")
+cat("</tr></table>")
+```
+
+Как видно корреляции нет, но есть интересное распределение на графике. Можно предположить, что была произведена манипуляция с данными. Возможно были исключены из выборки квартиры больше 50 м.кв. и выше 10 этажа, ценой выше 150 тыс. за к.м.. Такие квартиры относятся к классу премиум и, вероятно, зарезервированы для эксклюзивных продавцов/покупателей и поэтому отсутсвуют в общей выдаче.
+
+Ниже представлено три графика, показывающие распределение цен групп объектов разной этажности разбитых по застройщикам, районам, типу объекта и материалам из которых их делают. 
+
+```{r, echo=FALSE}
+ggplot(data.f, aes(Etajnosty, za_m2, col = Raion))+
+    geom_point()+
+    facet_grid(Prodavetc ~ .,  scales = "free", space = "free")+
+    coord_flip()+
+    scale_color_discrete(name = "District")+
+    labs(caption = "Chart 5. Count of objects price by Storeys of the house and District",
+         x = "Storeys of the house",
+         y = "Price for square meter")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+```
+
+График 5. показывает, что самые дорогие --- превосходящие в цене средниюю в полтора раза --- квартиры не малоэтажные - 4-6, а среднеэтажные - 10 этажей, принадлежат эти объекты `r length(unique(factor(filter(data.f, za_m2>(mean(za_m2)*1.5))$Prodavetc)))` застройщикам: `r unique(factor(filter(data.f, za_m2>(mean(za_m2)*1.5))$Prodavetc))`
+
+```{r, echo=FALSE}
+ggplot(data.f, aes(Etajnosty, za_m2, col = type))+
+    geom_point()+
+    facet_grid(Raion ~ .,  scales = "free", space = "free")+
+    coord_flip()+
+    scale_color_discrete(name = "Type")+
+    labs(caption = "Chart 6. Count of objects price by Storeys of the house and Type of object",
+         x = "Storeys of the house",
+         y = "Price for square meter")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+```
+
+График 6. показывает, что самые дорогие квартиры в районах `r unique(factor(filter(data.f, za_m2>(mean(za_m2)*1.5))$Raion))`. В последнем много объектов разной этажности. Именно в данных районах строятся апартаменты и они серьезно влияют на цену в большую сторону. Самые недорогие --- на 30% меньше средней цены --- квартиры в `r unique(factor(filter(data.f, za_m2<(mean(za_m2)*0.6))$Raion))` районе. 
+
+```{r, echo=FALSE}
+ggplot(data.f, aes(Etajnosty, za_m2, col = Tip))+
+    geom_point()+
+    facet_grid(Raion ~ .,  scales = "free", space = "free")+
+    coord_flip()+
+    scale_color_discrete(name = "Material")+
+    labs(caption = "Chart 7. Count of objects price by Storeys of the house and Material",
+         x = "Storeys of the house",
+         y = "Price for square meter")+
+    theme(strip.text.y = element_text(angle = 0),
+          plot.caption = element_text(hjust = 0))
+```
+
+Монолитный тип строения и в меньшей степени монолит/кирпич входит в группу дорогих строний. Из них строят дома средней высотности: `r unique(factor(filter(data.f, za_m2>(mean(za_m2)*1.5))$Etajnosty))`. Группа недорогих --- цена ниже среденей на 30% --- так же включает в себя монолит, но еще и панель-монолит и панель: `r unique(factor(filter(data.f, za_m2<(mean(za_m2)*0.7))$Etajnosty))`. Как видно, в данную группу входят дома малоэтажной застройки.
+
+## Выводы
+Самые дорогие квартиры оказались в `r unique(factor(filter(data.f, za_m2>(mean(za_m2)*1.5))$Raion))`районах. Недорогие --- в `r unique(factor(filter(data.f, za_m2<(mean(za_m2)*0.6))$Raion))`. Самые дорогие ЖК --- `r unique(factor(filter(sum1, mean_price>mean(mean_price))$"Жилой комплекс"))`. Самые недорогие ЖК --- `r unique(factor(filter(sum1, mean_price<(mean(mean_price))*0.7)$"Жилой комплекс"))`. Самые дорогие типы квартир `r unique(factor(filter(sum3, mean_price>mean(mean_price))$"Тип квартиры"))`. Сложно однозначно судить о том, что тип материла из которого делается дом может быть хорошим предиктором цены, по той причине, что совокупность других факторов, как тип квартиры, район или этажность могут играть значительную роль. Гипотеза о дороговизне апартаментов не может быть принята на основе полученных результатов. Данный анализ является предварительным и не может судить о вероятной цене апартаментов выходящих в продажу, поскольку количество анализируемых апартаментов намного меньше, чем квартир. Третья гипотеза о высокой цене малоэтажной застройки так же не может быть принята по той причине, что самыми дорогими оказались объекты средней высотности. 
+
+```{r, echo=FALSE, include=FALSE}
+#Спасибо, что дочитали до конца, надеюсь было не сильно скушно =)
+```
