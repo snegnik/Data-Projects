@@ -9,7 +9,7 @@ This repository contains my Data Analysis and Visualisation project. Mostly here
 		- [Correlations of Saint-Petersburg Housing Prices](http://rpubs.com/snegnik/flat_price_spb): Here I try to finde some patterns and relations between house propertieas and pricies for flats on market real estate in Saint-Petersburg. I have used parametres like a number of rooms, height of the house, materials a eds. For investigetion I used R and basic statistical mathods. Database was buit by myself based on inforamation on the search platform nmarket.pro. [_(Files)_](https://github.com/snegnik/Data-projects/tree/master/Real%20Estate%20Price%20Analysis%20(NMarket%20Data))
 		- [Cookbook. DATA ANALYSIS: STATISTICAL PROBLEMS AND SOLUTIONS IN R](https://rpubs.com/snegnik/Cookbook): This my R workbook with useful functions and statistical theory.
 	- __Python__
-		- _in progress..._
+		- [Survey of customers’ creditworthiness](https://github.com/snegnik/Data-Projects/blob/master/creditworthiness/Project_report_for_a_bank%E2%80%99s_loan_division.ipynb): The main goal was to find out if different customer’s statuses has an impact on whether they will default on a loan. the database was provided for educational purposes by Yandex. [_(Files)_](https://github.com/snegnik/Data-Projects/tree/master/creditworthiness)
 
 #### Also you can look the R portfolio [here](http://rpubs.com/snegnik/).
 
