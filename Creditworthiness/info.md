@@ -1,5 +1,5 @@
 # Analyzing borrowers’ risk of defaulting
-__[pandas, matplotlib, nltkm, scipy]__
+__[pandas, matplotlib, nltk, scipy]__
 
 The goal of this project is to prepare a report for a bank’s loan division. I had to find out if a customer’s statuses have an impact on whether they will default on a loan. I used bank data on customers’ creditworthiness. 
 
