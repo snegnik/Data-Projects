@@ -24,5 +24,7 @@ Within the framework of this project, it was necessary to find the most profitab
     * Use the bootstrapping technique with 1000 samples to find the distribution of profit.
     * Find average profit, 95% confidence interval and risk of losses. Loss is negative profit, calculate it as a probability and then express as a percentage.
     * Provide findings: suggest a region for development of oil wells and justify the choice.
-    
+
+## Conclusion
 All three regions are suitable for development. Of the three, Region 1 looks the most interesting. Region 1 could bring the most profit with hight probability and its development carries the least risks. Region 2 follows Region 1. Region 1 data is not normally distributed.
+
