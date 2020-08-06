@@ -4,10 +4,10 @@ This repository contains my Data Analysis and Visualization project. Mostly here
 
 ## __Contents__
 ## Python
-- ### Regression (Machine Learning)
+- ### Machine Learning: Regression
 	- [Finding the best place for a new OilyGiant well](https://github.com/snegnik/Data-Projects/blob/master/.ipynb): Within the framework of this project, it was necessary to find the most profitable regions in terms of profit for drilling oil wells. The data were given of oil production volumes by wells in three regions. Based on these data, I built a model - linear regression - and applied the bootstrap method to identify the most profitable region.
 	
-- ### Clustering (Supervised and Unsupervised Machine Learning)
+- ### Machine Learning: Clustering (Supervised and Unsupervised)
 	- [Bank Clients Behavior [unsupervised]](https://github.com/snegnik/Data-Projects/blob/master/Bank_Clients_Behavior/Bank%20Clients%20Behavior.ipynb): This study is aimed to learn how to accurately predict the behavior of the bank client, in particular, to predict whether the client will leave or not. For this, data is used on existing customers who have remained or gone. Those that have gone much less then stay, so the model may work worse. To improve the quality of the model, it is necessary to balance the number of those who left to the number of those who stay.
 	- [Hackathon from X5 DataMonetize (18.06.20-21.06.20) [supervised]](https://github.com/snegnik/Data-Projects/blob/master/HackathonX5/HackathonX5_DataMonetize(18.06.20-21.06.20).ipynb): Based on the received data, our team developed a hypothesis that customers can be segmented by their food basket. The result should have looked like a plane with dots on it. Each point is a customer. And the distance between the points is the coefficient of coincidence of the basket of one user with another. To solve this problem, a customer-product matrix was built. Two methods for reducing the dimension of PSA and TSNE are applied to the matrix. The results did not confirm our hypothesis that buyers are segmented in this way. It is possible to obtain segments at certain slices. But the power of the computer does not allow for multiple experiments.
 		
