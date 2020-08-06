@@ -1,6 +1,5 @@
 # Data Science Projects
-
-This repository contains my Data Analysis and Visualization project. Mostly here would be study projects, realized on statistic courses with using R and Python code. In the nearest future I'm going to publish my projects in Machine learning sphere realized on Python. 
+This repository contains my Data Analysis and Data Science Projects. Mostly here study projects, realized on statistic courses with using R and Python code.
 
 ## __Contents__
 ## Python
