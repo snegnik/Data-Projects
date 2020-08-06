@@ -1,4 +1,5 @@
 # Research data on sales and ratings of games
+__[pandas, matplotlib, numpy, seaborn, scipy]__
 
 This study focuses on the gaming industry. In particular, various factors affecting game sales are being studied. A large set of data is analyzed, including data on sales of games on three continents, from 1980 to 2016, released on various gaming platforms. Within the framework of the study, three major tasks were set: Compare platforms among each other; Compare genres; Explore regional specifics.
 
