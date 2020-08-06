@@ -1,7 +1,7 @@
 # Bank Clients Behavior
 #### to predict whether clients leave the bank or stay
 
-#### PLAN:
+## PLAN:
 1. Data preprocessing
     * Checking variables
     * Class ratio
