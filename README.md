@@ -4,7 +4,7 @@ This repository contains my Data Analysis and Data Science Projects. Mostly here
 ## __Contents__
 ## Python
 - ### Machine Learning: Regression
-	- [Finding the best place for a new OilyGiant well](https://github.com/snegnik/Data-Projects/blob/master/.ipynb): Within the framework of this project, it was necessary to find the most profitable regions in terms of profit for drilling oil wells. The data were given of oil production volumes by wells in three regions. Based on these data, I built a model - linear regression - and applied the bootstrap method to identify the most profitable region.
+	- [Finding the best place for a new OilyGiant well](https://github.com/snegnik/Data-Projects/tree/master/OilyGiant_well): Within the framework of this project, it was necessary to find the most profitable regions in terms of profit for drilling oil wells. The data were given of oil production volumes by wells in three regions. Based on these data, I built a model - linear regression - and applied the bootstrap method to identify the most profitable region.
 	
 - ### Machine Learning: Clustering (Supervised and Unsupervised)
 	- [Bank Clients Behavior [unsupervised]](https://github.com/snegnik/Data-Projects/blob/master/Bank_Clients_Behavior/Bank%20Clients%20Behavior.ipynb): This study is aimed to learn how to accurately predict the behavior of the bank client, in particular, to predict whether the client will leave or not. For this, data is used on existing customers who have remained or gone. Those that have gone much less then stay, so the model may work worse. To improve the quality of the model, it is necessary to balance the number of those who left to the number of those who stay.
