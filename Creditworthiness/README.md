@@ -18,3 +18,26 @@ Here some preliminary results. Can be primarily designated further hypothesis ac
 7. retired, servants and business are better loan payers than employees.
 
 Import to remember that results don’t show causation only some correlation between variables. For discovered deeper results, with structural relations and causations among data, more serious statistical analysis required.
+
+# Summary
+
+I have conducted an analysis of a sample of clients of a mobile operator’s network. 
+
+Preliminary analysis showed that:
+- Users of the "surf" plan are twice as many 
+- Users "surf" brougth 42% more profit then users on utimate plan
+- "ultimate" plan brought 23 dollars more profit per user
+Correlation test showed that:
+- The greatest contribution to profit is made by payments for the overspending of Internet traffic.
+
+Further research indicated that users in general, regardless of the tariff plan, use the same amount of traffic. 
+Student's test partly confirms the identity of the behavior of two groups of users. 
+A comparison of the average traffic usage and calls indicates that their differences are within the statistical error. 
+For users of a more expensive tariff plan, the limit is higher, so they overpay less. 
+In other words, lowering the tariff bar should not affect user behavior. 
+Further, it was revealed how, from month to month, tariff plan "surf" overtook the frozen plan "ultimate". 
+Profits from tariff plan "surf" became more and more. 
+
+**Recommendations**
+
+Based on the data obtained, to get more income you need, it is necessary to attract more users to a "cheaper" tariff. Or expand the number of tariff plans within the normal distribution of the use of Internet traffic.
