@@ -1,5 +1,5 @@
 # DATA SCIENCE PROJECTS
-This repository contains my Data Analysis and Data Science Projects. Mostly here study projects, realized on statistic courses with using R and Python code.
+This repository contains my Data Analysis and Data Science Projects. Mostly here study projects, realized on statistic courses with using Python and a little on R code. Most of the projects were implemented as part of the course in English. Therefore, project descriptions are also in English.
 
 ## __CONTENTS__
 ## Python
