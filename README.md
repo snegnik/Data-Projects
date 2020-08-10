@@ -1,7 +1,7 @@
-# Data Science Projects
+# DATA SCIENCE PROJECTS
 This repository contains my Data Analysis and Data Science Projects. Mostly here study projects, realized on statistic courses with using R and Python code.
 
-## __Contents__
+## __CONTENTS__
 ## Python
 - ### Machine Learning: Regression
 	- [Finding the best place for a new OilyGiant well](https://github.com/snegnik/Data-Projects/tree/master/OilyGiant_well): Within the framework of this project, it was necessary to find the most profitable regions in terms of profit for drilling oil wells. The data were given of oil production volumes by wells in three regions. Based on these data, I built a model - linear regression - and applied the bootstrap method to identify the most profitable region.
