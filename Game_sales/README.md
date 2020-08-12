@@ -1,5 +1,5 @@
 # Research data on sales and ratings of games
-**Tools kit**: [Correlation, Hypotheses testing, ] <br>
+**Tools kit**: [Correlation, Hypotheses testing, Pivot Tables] <br>
 **Libraries**: [pandas, matplotlib, numpy, seaborn, scipy]
 
 ## Description
