@@ -1,5 +1,5 @@
 # Analysing data of the telecom operator
-**Tools kit**: [Correlations, Test hypotheses, Preprocessing, PSE] <br>
+**Tools kit**: [Correlations, Test hypotheses, Preprocessing, PSE, Pivot Tables] <br>
 **Libraries**: [pandas, numpy, math, scipy, plotly, matplotlib, seaborn]
 
 ## Description
