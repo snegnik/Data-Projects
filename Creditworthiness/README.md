@@ -1,12 +1,12 @@
-# Analysing data of the telecom operator
-**Tools kit**: [Correlations, Test hypotheses, Preprocessing, PSE] <br>
-**Libraries**: [pandas, numpy, math, scipy, plotly, matplotlib, seaborn]
+# Analyzing borrowers’ risk of defaulting
+**Tools kit**: [Preprocessing, Categorizing, EDA, Pivot Tables, Stemming] <br>
+**Libraries**: [pandas, matplotlib, nltk, scipy]
 
 ## Description
-This project aims to study the behavior of subscribers of a given telecom operator. 
+Bank data on customers’ creditworthiness
 
 ## Problem
-Find out which plan is most profitable for a mobile operator?
+Find out if a customer’s statuses has an impact on whether they will default on a loan.
 
 ## Сonclusions
-Based on the data obtained, to get more income you need, it is necessary to attract more users to a "surf" tariff. Or expand the number of tariff plans within the normal distribution of the use of Internet traffic.
+Existence of the children, lower-middle class, loan for auto and education, experience from 2 to 5 years, decries chances to repay a loan. Marriage, divorced and widow(er) status, rich and middle class, education, experience more than 25 years, retired, servants and business is better loan payers.
