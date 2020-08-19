@@ -2,15 +2,6 @@
 **Набор инструментов**: [Correlation, Preprocessing, PSE, Pivot Tables, Visualization] <br>
 **Библиотеки**: [pandas, numpy, requests, re, BeautifulSoup, matplotlib]
 
-import requests
-import re
-import pandas as pd
-from bs4 import BeautifulSoup
-from datetime import datetime
-import unicodedata
-import matplotlib.pyplot as plt
-import numpy as np
-
 ## Описание
 Целью данной работы явлется демонстрация работы парсера и разведовательный анализ рыков недвижимости двух городах - Санкт-Петербург и Москва - с наиболее динамично развивающимся строительным сектором. Для сбора данных мною был написан парсер для крупнейшей в россии доски объявлений - Авито. Сбор данных проходил в разделах посвященных продаже объектов недвижимости. 
 
